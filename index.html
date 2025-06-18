@@ -4,43 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AGENDA</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#8e44ad">
   <style>
+    :root {
+      --cor-principal: #d29ce0;
+      --cor-botao: #8e44ad;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f7f7f7;
       margin: 0;
       padding: 1rem;
     }
-
     h1 {
       text-align: center;
-      color: #8e44ad;
-      margin-bottom: 2rem;
+      color: var(--cor-botao);
+      margin-bottom: 1rem;
     }
-
     #week {
       max-width: 600px;
       margin: auto;
     }
-
     .day {
-      background: #d29ce0;
+      background: var(--cor-principal);
       border-radius: 12px;
       padding: 1rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-
     .day h2 {
       margin-top: 0;
       color: white;
       font-size: 1.2rem;
     }
-
     .tasks {
       margin-top: 0.5rem;
     }
-
     .task {
       background: white;
       padding: 0.6rem 0.8rem;
@@ -51,12 +53,10 @@
       align-items: center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-
     .task span {
       flex-grow: 1;
       margin-right: 10px;
     }
-
     .task button {
       background: #ff4d4d;
       border: none;
@@ -66,14 +66,12 @@
       cursor: pointer;
       font-size: 0.8rem;
     }
-
     .task button:hover {
       background: #cc0000;
     }
-
     button.add {
       margin-top: 0.7rem;
-      background: #8e44ad;
+      background: var(--cor-botao);
       color: white;
       border: none;
       padding: 0.6rem;
@@ -84,12 +82,9 @@
       font-size: 1rem;
       transition: background 0.3s;
     }
-
     button.add:hover {
-      background: #6c2d8c;
+      filter: brightness(90%);
     }
-
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -102,7 +97,6 @@
       justify-content: center;
       align-items: center;
     }
-
     .modal-content {
       background: #fff;
       padding: 1.5rem;
@@ -114,23 +108,22 @@
       flex-direction: column;
       gap: 1rem;
     }
-
     .modal-content h3 {
       margin: 0;
       font-size: 1.2rem;
-      color: #8e44ad;
+      color: var(--cor-botao);
       text-align: center;
     }
-
-    .modal-content input {
+    .modal-content input[type="text"],
+    .modal-content input[type="time"],
+    .modal-content input[type="color"] {
       padding: 0.6rem;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1rem;
     }
-
     .modal-content button {
-      background: #8e44ad;
+      background: var(--cor-botao);
       color: white;
       border: none;
       padding: 0.6rem;
@@ -139,47 +132,69 @@
       font-size: 1rem;
       cursor: pointer;
     }
-
     .modal-content button:hover {
-      background: #6c2d8c;
+      filter: brightness(90%);
+    }
+    .top-buttons {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .top-buttons button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .top-buttons button:hover {
+      background: #2980b9;
     }
   </style>
 </head>
 <body>
   <h1>🗓️ AGENDA</h1>
+  <div class="top-buttons">
+    <button onclick="abrirConfiguracoes()">🎨 Personalizar Cores</button>
+  </div>
   <div id="week"></div>
-
-  <!-- Modal de Tarefa -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <h3>Adicionar nova tarefa</h3>
-      <input type="text" id="modal-input" placeholder="Digite sua tarefa" />
+      <input type="text" id="modal-input" placeholder="Digite a tarefa" />
+      <input type="time" id="modal-time" />
       <button id="modal-save">Salvar</button>
     </div>
   </div>
-
+  <div id="config-modal" class="modal">
+    <div class="modal-content">
+      <h3>Personalizar Cores</h3>
+      <label>Cor dos Blocos:</label>
+      <input type="color" id="cor-principal" />
+      <label>Cor dos Botões:</label>
+      <input type="color" id="cor-botao" />
+      <button onclick="salvarConfiguracoes()">Salvar</button>
+    </div>
+  </div>
   <script>
     const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
     const container = document.getElementById('week');
-
     function salvarTarefas(dia, tarefas) {
       localStorage.setItem(`tarefas-${dia}`, JSON.stringify(tarefas));
     }
-
     function carregarTarefas(dia) {
       return JSON.parse(localStorage.getItem(`tarefas-${dia}`)) || [];
     }
-
     function atualizarLista(dia, elemento) {
       elemento.innerHTML = '';
       const tarefas = carregarTarefas(dia);
       tarefas.forEach((tarefa, index) => {
         const div = document.createElement('div');
         div.className = 'task';
-
         const span = document.createElement('span');
-        span.textContent = tarefa;
-
+        span.textContent = tarefa.horario ? `${tarefa.horario} - ${tarefa.texto}` : tarefa.texto;
         const botaoRemover = document.createElement('button');
         botaoRemover.textContent = '✖';
         botaoRemover.onclick = () => {
@@ -187,58 +202,75 @@
           salvarTarefas(dia, tarefas);
           atualizarLista(dia, elemento);
         };
-
         div.appendChild(span);
         div.appendChild(botaoRemover);
         elemento.appendChild(div);
       });
     }
-
     function criarBlocoDia(dia) {
       const bloco = document.createElement('div');
       bloco.className = 'day';
-
       const titulo = document.createElement('h2');
       titulo.textContent = dia;
       bloco.appendChild(titulo);
-
       const lista = document.createElement('div');
       lista.className = 'tasks';
       bloco.appendChild(lista);
-
       const botao = document.createElement('button');
       botao.className = 'add';
       botao.textContent = '➕ Adicionar tarefa';
-      botao.onclick = () => {
-        abrirModal(dia, lista);
-      };
+      botao.onclick = () => abrirModal(dia, lista);
       bloco.appendChild(botao);
-
       atualizarLista(dia, lista);
       container.appendChild(bloco);
     }
-
     function abrirModal(dia, lista) {
       const modal = document.getElementById('modal');
       const input = document.getElementById('modal-input');
+      const time = document.getElementById('modal-time');
       const salvar = document.getElementById('modal-save');
-
       input.value = '';
+      time.value = '';
       modal.style.display = 'flex';
-
       salvar.onclick = () => {
         const texto = input.value.trim();
+        const horario = time.value;
         if (texto) {
           const tarefas = carregarTarefas(dia);
-          tarefas.push(texto);
+          tarefas.push({ texto, horario });
           salvarTarefas(dia, tarefas);
           atualizarLista(dia, lista);
         }
         modal.style.display = 'none';
       };
     }
-
-    dias.forEach(dia => criarBlocoDia(dia));
+    function abrirConfiguracoes() {
+      const modal = document.getElementById('config-modal');
+      const inputCorPrincipal = document.getElementById('cor-principal');
+      const inputCorBotao = document.getElementById('cor-botao');
+      inputCorPrincipal.value = getComputedStyle(document.documentElement).getPropertyValue('--cor-principal').trim() || '#d29ce0';
+      inputCorBotao.value = getComputedStyle(document.documentElement).getPropertyValue('--cor-botao').trim() || '#8e44ad';
+      modal.style.display = 'flex';
+    }
+    function salvarConfiguracoes() {
+      const corPrincipal = document.getElementById('cor-principal').value;
+      const corBotao = document.getElementById('cor-botao').value;
+      document.documentElement.style.setProperty('--cor-principal', corPrincipal);
+      document.documentElement.style.setProperty('--cor-botao', corBotao);
+      localStorage.setItem('corPrincipal', corPrincipal);
+      localStorage.setItem('corBotao', corBotao);
+      document.getElementById('config-modal').style.display = 'none';
+    }
+    window.onload = () => {
+      const corPrincipal = localStorage.getItem('corPrincipal');
+      const corBotao = localStorage.getItem('corBotao');
+      if (corPrincipal) document.documentElement.style.setProperty('--cor-principal', corPrincipal);
+      if (corBotao) document.documentElement.style.setProperty('--cor-botao', corBotao);
+      dias.forEach(dia => criarBlocoDia(dia));
+    };
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
   </script>
 </body>
 </html>
