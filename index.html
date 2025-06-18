@@ -88,11 +88,75 @@
     button.add:hover {
       background: #6c2d8c;
     }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      max-width: 90%;
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-content h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #8e44ad;
+      text-align: center;
+    }
+
+    .modal-content input {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .modal-content button {
+      background: #8e44ad;
+      color: white;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background: #6c2d8c;
+    }
   </style>
 </head>
 <body>
   <h1>🗓️ AGENDA MOZONA</h1>
   <div id="week"></div>
+
+  <!-- Modal de Tarefa -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3>Adicionar nova tarefa</h3>
+      <input type="text" id="modal-input" placeholder="Digite sua tarefa" />
+      <button id="modal-save">Salvar</button>
+    </div>
+  </div>
 
   <script>
     const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
@@ -146,18 +210,32 @@
       botao.className = 'add';
       botao.textContent = '➕ Adicionar tarefa';
       botao.onclick = () => {
-        const texto = prompt(`Nova tarefa para ${dia}:`);
+        abrirModal(dia, lista);
+      };
+      bloco.appendChild(botao);
+
+      atualizarLista(dia, lista);
+      container.appendChild(bloco);
+    }
+
+    function abrirModal(dia, lista) {
+      const modal = document.getElementById('modal');
+      const input = document.getElementById('modal-input');
+      const salvar = document.getElementById('modal-save');
+
+      input.value = '';
+      modal.style.display = 'flex';
+
+      salvar.onclick = () => {
+        const texto = input.value.trim();
         if (texto) {
           const tarefas = carregarTarefas(dia);
           tarefas.push(texto);
           salvarTarefas(dia, tarefas);
           atualizarLista(dia, lista);
         }
+        modal.style.display = 'none';
       };
-      bloco.appendChild(botao);
-
-      atualizarLista(dia, lista);
-      container.appendChild(bloco);
     }
 
     dias.forEach(dia => criarBlocoDia(dia));
