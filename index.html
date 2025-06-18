@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AGENDA MOZONA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #8e44ad;
+      margin-bottom: 2rem;
+    }
+
+    #week {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .day {
+      background: #d29ce0;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .day h2 {
+      margin-top: 0;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .tasks {
+      margin-top: 0.5rem;
+    }
+
+    .task {
+      background: white;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .task span {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+
+    .task button {
+      background: #ff4d4d;
+      border: none;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .task button:hover {
+      background: #cc0000;
+    }
+
+    button.add {
+      margin-top: 0.7rem;
+      background: #8e44ad;
+      color: white;
+      border: none;
+      padding: 0.6rem;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    button.add:hover {
+      background: #6c2d8c;
+    }
+  </style>
+</head>
+<body>
+  <h1>🗓️ AGENDA MOZONA</h1>
+  <div id="week"></div>
+
+  <script>
+    const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+    const container = document.getElementById('week');
+
+    function salvarTarefas(dia, tarefas) {
+      localStorage.setItem(`tarefas-${dia}`, JSON.stringify(tarefas));
+    }
+
+    function carregarTarefas(dia) {
+      return JSON.parse(localStorage.getItem(`tarefas-${dia}`)) || [];
+    }
+
+    function atualizarLista(dia, elemento) {
+      elemento.innerHTML = '';
+      const tarefas = carregarTarefas(dia);
+      tarefas.forEach((tarefa, index) => {
+        const div = document.createElement('div');
+        div.className = 'task';
+
+        const span = document.createElement('span');
+        span.textContent = tarefa;
+
+        const botaoRemover = document.createElement('button');
+        botaoRemover.textContent = '✖';
+        botaoRemover.onclick = () => {
+          tarefas.splice(index, 1);
+          salvarTarefas(dia, tarefas);
+          atualizarLista(dia, elemento);
+        };
+
+        div.appendChild(span);
+        div.appendChild(botaoRemover);
+        elemento.appendChild(div);
+      });
+    }
+
+    function criarBlocoDia(dia) {
+      const bloco = document.createElement('div');
+      bloco.className = 'day';
+
+      const titulo = document.createElement('h2');
+      titulo.textContent = dia;
+      bloco.appendChild(titulo);
+
+      const lista = document.createElement('div');
+      lista.className = 'tasks';
+      bloco.appendChild(lista);
+
+      const botao = document.createElement('button');
+      botao.className = 'add';
+      botao.textContent = '➕ Adicionar tarefa';
+      botao.onclick = () => {
+        const texto = prompt(`Nova tarefa para ${dia}:`);
+        if (texto) {
+          const tarefas = carregarTarefas(dia);
+          tarefas.push(texto);
+          salvarTarefas(dia, tarefas);
+          atualizarLista(dia, lista);
+        }
+      };
+      bloco.appendChild(botao);
+
+      atualizarLista(dia, lista);
+      container.appendChild(bloco);
+    }
+
+    dias.forEach(dia => criarBlocoDia(dia));
+  </script>
+</body>
+</html>
